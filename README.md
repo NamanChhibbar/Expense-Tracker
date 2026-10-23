@@ -1,71 +1,131 @@
-# 🌸 Pocket Petals
+# Expense Tracker
 
-A cute pink, single-page expense tracker. No logins: pick who you are from the dropdown, or create a new user.
+Expense Tracker is a lightweight, single-page web app for recording personal expenses. It supports multiple users without authentication. Select a user from the header, or create one.
 
-Backend is FastAPI with SQLite, in `backend/`. The frontend is plain HTML, CSS and JavaScript in `public/`.
+## Features
 
-## Run locally
+- Create users, each with a display name, an emoji and a currency.
+- Switch between users from the header.
+- Add expenses with a description, amount, category and date.
+- Delete expenses.
+- View the current month's total and the all-time total for each user.
 
-```bash
-uv venv && uv pip install -r backend/requirements.txt   # or: python -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
-.venv/bin/uvicorn backend.app:app --reload           # http://localhost:8000, run from the project root
-```
+## Tech stack
 
-Data is stored in `data/expenses.db`, created on first run. Set `DB_PATH` to put it elsewhere. Back it up by copying that file.
+- **Backend:** Python, FastAPI and SQLite.
+- **Frontend:** Plain HTML, CSS and JavaScript, with no build step.
 
-Other settings, like categories and currencies, live in `backend/config.py`.
+## Requirements
 
-Interactive API docs are at `/docs` while the server runs.
+- Python 3.10 or newer.
+- [uv](https://docs.astral.sh/uv/) is optional. The standard `venv` and `pip` tools work as well.
 
-## Deploy on the Google Cloud free tier
+## Getting started
 
-The always-free tier includes one `e2-micro` VM in `us-west1`, `us-central1` or `us-east1`, with 30 GB of standard disk. A VM keeps the SQLite file on a persistent disk, so data survives restarts.
-
-```bash
-gcloud compute instances create pocket-petals \
-  --zone=us-central1-a --machine-type=e2-micro \
-  --boot-disk-type=pd-standard --boot-disk-size=30GB \
-  --image-family=debian-12 --image-project=debian-cloud \
-  --tags=http-server
-
-gcloud compute firewall-rules create allow-http --allow=tcp:80 --target-tags=http-server
-
-gcloud compute ssh pocket-petals --zone=us-central1-a
-```
-
-On the VM:
+Clone the repository and install the dependencies:
 
 ```bash
-sudo apt-get update && sudo apt-get install -y git python3-venv
-sudo git clone <your-repo-url> /opt/pocket-petals
-cd /opt/pocket-petals
-sudo python3 -m venv .venv && sudo .venv/bin/pip install -r backend/requirements.txt
-sudo mkdir -p data && sudo chown -R www-data:www-data data
-sudo cp deploy/pocket-petals.service /etc/systemd/system/
-sudo systemctl enable --now pocket-petals
+git clone <repository-url>
+cd <repository-folder>
+
+python3 -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt
 ```
 
-The app is then served at the VM's external IP over plain HTTP. There is no login, so anyone with the IP can see and edit expenses.
+With uv, the install step is:
 
-Avoid Cloud Run with this setup. Its disk is wiped whenever an instance restarts or scales, which would delete the SQLite file.
+```bash
+uv venv
+uv pip install -r backend/requirements.txt
+```
 
-## Project layout
+Start the development server from the project root:
+
+```bash
+.venv/bin/uvicorn backend.app:app --reload
+```
+
+The app is then available at http://localhost:8000. Interactive API documentation is available at http://localhost:8000/docs.
+
+## Configuration
+
+These environment variables override the defaults:
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `DB_PATH` | `data/expenses.db` | Location of the SQLite database file. It is created on first run. |
+| `PUBLIC_DIR` | `public` | Folder containing the frontend files. |
+
+Categories, currencies and other defaults are defined in `backend/config.py`.
+
+To back up your data, copy the database file while the server is stopped.
+
+## Deployment
+
+The following steps deploy the app to a Google Compute Engine `e2-micro` VM. This machine type is included in the Google Cloud free tier in the `us-west1`, `us-central1` and `us-east1` regions. Check the current [free tier terms](https://cloud.google.com/free) before deploying.
+
+A VM is recommended over Cloud Run. Cloud Run does not keep local files between instance restarts, so the SQLite database would be lost.
+
+1. Create the VM and allow HTTP traffic:
+
+   ```bash
+   gcloud compute instances create expense-tracker \
+     --zone=us-central1-a --machine-type=e2-micro \
+     --boot-disk-type=pd-standard --boot-disk-size=30GB \
+     --image-family=debian-12 --image-project=debian-cloud \
+     --tags=http-server
+
+   gcloud compute firewall-rules create allow-http \
+     --allow=tcp:80 --target-tags=http-server
+   ```
+
+2. Connect to the VM:
+
+   ```bash
+   gcloud compute ssh expense-tracker --zone=us-central1-a
+   ```
+
+3. Install the app and run it as a systemd service:
+
+   ```bash
+   sudo apt-get update && sudo apt-get install -y git python3-venv
+   sudo git clone <repository-url> /opt/expense-tracker
+   cd /opt/expense-tracker
+   sudo python3 -m venv .venv
+   sudo .venv/bin/pip install -r backend/requirements.txt
+   sudo mkdir -p data && sudo chown -R www-data:www-data data
+   sudo cp deploy/expense-tracker.service /etc/systemd/system/
+   sudo systemctl enable --now expense-tracker
+   ```
+
+The app is then served over HTTP on port 80 at the VM's external IP address.
+
+## Security
+
+The app has no authentication. Anyone who can reach the server can view, add and delete expenses for every user. Run it only on a trusted network, or put it behind an access control layer such as a reverse proxy with authentication. Use HTTPS for any deployment reachable from the internet.
+
+## Project structure
 
 | Path | Contents |
 | --- | --- |
-| `backend/app.py` | FastAPI app, routes and error handlers |
+| `backend/app.py` | FastAPI application, routes and error handlers |
 | `backend/models.py` | Request models and validation |
 | `backend/config.py` | Paths, categories, currencies and defaults |
 | `backend/db.py` | SQLite schema and connection helper |
+| `backend/requirements.txt` | Python dependencies |
 | `public/` | Frontend page, styles and script |
-| `deploy/` | systemd unit for the VM |
+| `deploy/` | systemd service file for VM deployment |
 
-## API
+## API reference
 
-| Method | Path | Body |
-| --- | --- | --- |
-| GET | `/api/users` | |
-| POST | `/api/users` | `{ name, emoji?, currency? }` |
-| GET | `/api/users/:id/expenses` | |
-| POST | `/api/users/:id/expenses` | `{ description, amount, category, date }` |
-| DELETE | `/api/expenses/:id` | |
+All endpoints accept and return JSON. Errors are returned as `{ "error": "message" }`.
+
+| Method | Path | Request body | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/users` | None | Lists users, plus the available categories and currencies. |
+| `POST` | `/api/users` | `{ name, emoji?, currency? }` | Creates a user. User names must be unique. |
+| `GET` | `/api/users/{id}/expenses` | None | Lists a user's expenses, newest first. |
+| `POST` | `/api/users/{id}/expenses` | `{ description, amount, category?, date? }` | Adds an expense. `date` uses the `YYYY-MM-DD` format and defaults to today. |
+| `DELETE` | `/api/expenses/{id}` | None | Deletes an expense. |
+
+Amounts are returned in cents, in the `amount_cents` field.

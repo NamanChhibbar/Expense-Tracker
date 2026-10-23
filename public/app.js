@@ -2,7 +2,7 @@ const CATEGORY_EMOJI = {
   Food: '🍓', Shopping: '🛍️', Transport: '🚌', Bills: '🧾',
   Fun: '🎀', Health: '💊', Gifts: '🎁', Other: '✨',
 };
-const STORAGE_KEY = 'pocket-petals:user';
+const STORAGE_KEY = 'expense-tracker:user';
 
 const $ = (id) => document.getElementById(id);
 const els = {

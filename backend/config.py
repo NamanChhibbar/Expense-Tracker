@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = Path(os.environ.get('PUBLIC_DIR', PROJECT_ROOT / 'public'))
 DB_PATH = Path(os.environ.get('DB_PATH', PROJECT_ROOT / 'data' / 'expenses.db'))
 
-APP_TITLE = 'Pocket Petals'
+APP_TITLE = 'Expense Tracker'
 
 CATEGORIES = ['Food', 'Shopping', 'Travel', 'Bills', 'Health', 'Other']
 DEFAULT_CATEGORY = 'Other'

@@ -1,1 +1,1 @@
-'''Pocket Petals: a tiny FastAPI expense tracker backed by SQLite.'''
+'''Expense Tracker backend, built with FastAPI and SQLite.'''
