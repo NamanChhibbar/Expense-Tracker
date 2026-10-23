@@ -1,0 +1,16 @@
+# systemd unit for running the app on a Compute Engine VM.
+# Assumes the repo is cloned to /opt/pocket-petals and a venv exists at .venv.
+[Unit]
+Description=Pocket Petals expense tracker
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/pocket-petals
+Environment=DB_PATH=/opt/pocket-petals/data/expenses.db
+ExecStart=/opt/pocket-petals/.venv/bin/uvicorn backend.app:app --host 0.0.0.0 --port 80
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pocket Petals</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1><span aria-hidden="true">🌸</span> Pocket Petals</h1>
+      <div class="user-picker">
+        <label for="user-select" class="sr-only">Who's tracking?</label>
+        <select id="user-select"></select>
+        <button id="new-user-btn" class="btn btn-soft" type="button">+ New user</button>
+      </div>
+    </header>
+
+    <!-- Shown when no users exist yet, or when creating one -->
+    <section id="user-form-card" class="card" hidden>
+      <h2>Who's this? 💕</h2>
+      <form id="user-form" class="form-grid">
+        <label>Name
+          <input name="name" maxlength="40" required placeholder="e.g. Bunny" autocomplete="off" />
+        </label>
+        <label>Emoji
+          <select name="emoji">
+            <option>🌸</option><option>🐰</option><option>🍓</option><option>🦄</option>
+            <option>🧁</option><option>🌷</option><option>🐱</option><option>💖</option>
+          </select>
+        </label>
+        <label>Currency
+          <select name="currency" id="currency-select"></select>
+        </label>
+        <div class="form-actions">
+          <button type="button" id="cancel-user-btn" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn">Create</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="tracker" hidden>
+      <div class="summary">
+        <div class="stat card">
+          <span class="stat-label">This month</span>
+          <span class="stat-value" id="month-total">0</span>
+        </div>
+        <div class="stat card">
+          <span class="stat-label">All time</span>
+          <span class="stat-value" id="all-total">0</span>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Add an expense ✨</h2>
+        <form id="expense-form" class="form-grid">
+          <label class="span-2">What was it?
+            <input name="description" maxlength="80" required placeholder="Boba tea" autocomplete="off" />
+          </label>
+          <label>Amount
+            <input name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" inputmode="decimal" />
+          </label>
+          <label>Category
+            <select name="category" id="category-select"></select>
+          </label>
+          <label>Date
+            <input name="date" type="date" required />
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="btn">Add 💸</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Spending</h2>
+        <ul id="expense-list" class="expense-list"></ul>
+        <p id="empty-state" class="empty" hidden>No expenses yet. Treat yourself! 🍰</p>
+      </section>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
