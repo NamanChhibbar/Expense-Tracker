@@ -1,4 +1,4 @@
-# systemd unit for running the app on a Compute Engine VM.
+# systemd unit for running the app on a Linux server.
 # Assumes the repo is cloned to /opt/expense-tracker and a venv exists at .venv.
 [Unit]
 Description=Expense Tracker

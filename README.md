@@ -62,43 +62,38 @@ To back up your data, copy the database file while the server is stopped.
 
 ## Deployment
 
-The following steps deploy the app to a Google Compute Engine `e2-micro` VM. This machine type is included in the Google Cloud free tier in the `us-west1`, `us-central1` and `us-east1` regions. Check the current [free tier terms](https://cloud.google.com/free) before deploying.
+The app can run on any Linux server with Python 3.10 or newer. The repository includes a systemd service file in `deploy/` that starts the app at boot and restarts it if it stops.
 
-A VM is recommended over Cloud Run. Cloud Run does not keep local files between instance restarts, so the SQLite database would be lost.
+Choose a host with persistent storage. The database is a local SQLite file, so platforms that reset the filesystem on restart will lose all data.
 
-1. Create the VM and allow HTTP traffic:
-
-   ```bash
-   gcloud compute instances create expense-tracker \
-     --zone=us-central1-a --machine-type=e2-micro \
-     --boot-disk-type=pd-standard --boot-disk-size=30GB \
-     --image-family=debian-12 --image-project=debian-cloud \
-     --tags=http-server
-
-   gcloud compute firewall-rules create allow-http \
-     --allow=tcp:80 --target-tags=http-server
-   ```
-
-2. Connect to the VM:
+1. Install the app on the server:
 
    ```bash
-   gcloud compute ssh expense-tracker --zone=us-central1-a
-   ```
-
-3. Install the app and run it as a systemd service:
-
-   ```bash
-   sudo apt-get update && sudo apt-get install -y git python3-venv
    sudo git clone <repository-url> /opt/expense-tracker
    cd /opt/expense-tracker
    sudo python3 -m venv .venv
    sudo .venv/bin/pip install -r backend/requirements.txt
    sudo mkdir -p data && sudo chown -R www-data:www-data data
+   ```
+
+2. Install and start the service:
+
+   ```bash
    sudo cp deploy/expense-tracker.service /etc/systemd/system/
    sudo systemctl enable --now expense-tracker
    ```
 
-The app is then served over HTTP on port 80 at the VM's external IP address.
+The app is then served over HTTP on port 80. Make sure the server's firewall allows incoming traffic on that port.
+
+If you install the app in a different folder, or want a different port or user, edit the service file before copying it.
+
+To manage the service:
+
+```bash
+sudo systemctl status expense-tracker     # check whether it is running
+sudo systemctl restart expense-tracker    # apply code updates
+journalctl -u expense-tracker -f          # follow the logs
+```
 
 ## Security
 
@@ -114,7 +109,7 @@ The app has no authentication. Anyone who can reach the server can view, add and
 | `backend/db.py` | SQLite schema and connection helper |
 | `backend/requirements.txt` | Python dependencies |
 | `public/` | Frontend page, styles and script |
-| `deploy/` | systemd service file for VM deployment |
+| `deploy/` | systemd service file for server deployment |
 
 ## API reference
 
