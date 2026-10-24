@@ -118,6 +118,8 @@ input:focus, select:focus { outline: none; border-color: var(--pink); background
   color: #fff;
   box-shadow: 0 4px 0 var(--pink-deep);
   transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
+  text-decoration: none;
+  display: inline-block;
 }
 .btn:hover { background: var(--pink-deep); }
 .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--pink-deep); }
@@ -185,6 +187,14 @@ input:focus, select:focus { outline: none; border-color: var(--pink); background
   font-weight: 600;
 }
 .form-error[hidden] { display: none; }
+
+.table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.admin-table th, .admin-table td { text-align: left; padding: 10px 8px; border-bottom: 2px dashed var(--line); }
+.admin-table thead th { font-size: 0.85rem; color: var(--ink-soft); }
+.admin-table tbody tr:last-child > * { border-bottom: none; }
+.admin-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.admin-table .actions { width: 1%; padding-top: 4px; padding-bottom: 4px; }
 
 .empty { text-align: center; color: var(--ink-soft); margin: 8px 0; }
 

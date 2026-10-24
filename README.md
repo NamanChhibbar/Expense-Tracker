@@ -9,6 +9,7 @@ Expense Tracker is a lightweight, single-page web app for recording personal exp
 - Add expenses with a description, amount, category and date.
 - Edit and delete expenses.
 - View the current month's total and the all-time total for each user.
+- See every user with their expense count and totals, and delete users, on the admin page at `/admin`.
 
 ## Tech stack
 
@@ -90,7 +91,7 @@ journalctl -u expense-tracker -f          # follow the logs
 
 ## Security
 
-The app has no authentication. Anyone who can reach the server can view, add and delete expenses for every user. Run it only on a trusted network, or put it behind an access control layer such as a reverse proxy with authentication. Use HTTPS for any deployment reachable from the internet.
+The app has no authentication. Anyone who can reach the server can view, add and delete expenses for every user, and use the admin page at `/admin` to delete any user. Run it only on a trusted network, or put it behind an access control layer such as a reverse proxy with authentication. Use HTTPS for any deployment reachable from the internet.
 
 ## Project structure
 
@@ -101,7 +102,7 @@ The app has no authentication. Anyone who can reach the server can view, add and
 | `backend/config.py` | Paths, categories, currencies and defaults |
 | `backend/db.py` | SQLite schema and connection helper |
 | `backend/requirements.txt` | Python dependencies |
-| `public/` | Frontend page, styles and script |
+| `public/` | Frontend pages (tracker and admin), styles and scripts |
 | `deploy/` | systemd service file for server deployment |
 
 ## API reference
@@ -116,5 +117,7 @@ All endpoints accept and return JSON. Errors are returned as `{ "error": "messag
 | `POST` | `/api/users/{id}/expenses` | `{ description, amount, category?, date? }` | Adds an expense. `date` uses the `YYYY-MM-DD` format and defaults to today. |
 | `PUT` | `/api/expenses/{id}` | `{ description, amount, category?, date? }` | Updates an expense. Omitted optional fields fall back to their defaults. |
 | `DELETE` | `/api/expenses/{id}` | None | Deletes an expense. |
+| `GET` | `/api/admin/users` | None | Lists every user with `expense_count`, `total_cents`, `last_spent_on` and `created_at`. |
+| `DELETE` | `/api/admin/users/{id}` | None | Deletes a user and all of their expenses. |
 
 Amounts are returned in cents, in the `amount_cents` field.

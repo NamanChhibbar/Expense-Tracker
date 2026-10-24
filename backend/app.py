@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -111,6 +111,33 @@ def update_expense(expense_id: int, body: Expense):
   return dict(row)
 
 
+@app.get('/api/admin/users')
+def admin_list_users():
+  with connect() as conn:
+    rows = conn.execute(
+      '''
+      SELECT u.id, u.name, u.currency, u.created_at,
+        COUNT(e.id) AS expense_count,
+        COALESCE(SUM(e.amount_cents), 0) AS total_cents,
+        MAX(e.spent_on) AS last_spent_on
+      FROM users u LEFT JOIN expenses e ON e.user_id = u.id
+      GROUP BY u.id
+      ORDER BY u.name
+      '''
+    ).fetchall()
+  return [dict(r) for r in rows]
+
+
+# The user's expenses are removed too, by the ON DELETE CASCADE in the schema.
+@app.delete('/api/admin/users/{user_id}', status_code=204)
+def admin_delete_user(user_id: int):
+  with connect() as conn:
+    cur = conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
+  if cur.rowcount == 0:
+    raise HTTPException(404, 'User not found')
+  return Response(status_code=204)
+
+
 @app.delete('/api/expenses/{expense_id}', status_code=204)
 def delete_expense(expense_id: int):
   with connect() as conn:
@@ -118,6 +145,12 @@ def delete_expense(expense_id: int):
   if cur.rowcount == 0:
     raise HTTPException(404, 'Expense not found')
   return Response(status_code=204)
+
+
+# StaticFiles only maps folders to index.html, so /admin needs its own route.
+@app.get('/admin', include_in_schema=False)
+def admin_page():
+  return FileResponse(PUBLIC_DIR / 'admin' / 'admin.html')
 
 
 # Mounted last so the /api routes above take priority.
