@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .db import EXPENSE_COLS, USER_COLS, connect, init_db
 from .models import Expense, User
@@ -22,9 +23,20 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title=APP_TITLE, lifespan=lifespan)
 
 
+# Without this header, browsers may reuse a cached app.js or style.css after you edit them.
+# 'no-cache' still allows caching, but makes the browser check for a newer version first.
+@app.middleware('http')
+async def revalidate_static_files(request: Request, call_next):
+  response = await call_next(request)
+  if not request.url.path.startswith('/api/'):
+    response.headers.setdefault('Cache-Control', 'no-cache')
+  return response
+
+
 # The frontend expects errors shaped as {'error': 'message'}.
-@app.exception_handler(HTTPException)
-async def http_error(_: Request, exc: HTTPException):
+# Registered for Starlette's HTTPException so router errors like 404 and 405 are covered too.
+@app.exception_handler(StarletteHTTPException)
+async def http_error(_: Request, exc: StarletteHTTPException):
   return JSONResponse({'error': exc.detail}, status_code=exc.status_code)
 
 
@@ -33,7 +45,7 @@ async def validation_error(_: Request, exc: RequestValidationError):
   first = exc.errors()[0]
   field = str(first['loc'][-1]).capitalize()
   message = first['msg'].removeprefix('Value error, ')
-  sep = ' ' if message.startswith('is ') else ': '
+  sep = ' ' if message.startswith(('is ', 'must ')) else ': '
   return JSONResponse({'error': f'{field}{sep}{message}'}, status_code=400)
 
 
@@ -83,6 +95,19 @@ def create_expense(user_id: int, body: Expense):
       (user_id, body.description, round(body.amount * 100), body.category, body.date),
     )
     row = conn.execute(f'SELECT {EXPENSE_COLS} FROM expenses WHERE id = ?', (cur.lastrowid,)).fetchone()
+  return dict(row)
+
+
+@app.put('/api/expenses/{expense_id}')
+def update_expense(expense_id: int, body: Expense):
+  with connect() as conn:
+    cur = conn.execute(
+      'UPDATE expenses SET description = ?, amount_cents = ?, category = ?, spent_on = ? WHERE id = ?',
+      (body.description, round(body.amount * 100), body.category, body.date, expense_id),
+    )
+    if cur.rowcount == 0:
+      raise HTTPException(404, 'Expense not found')
+    row = conn.execute(f'SELECT {EXPENSE_COLS} FROM expenses WHERE id = ?', (expense_id,)).fetchone()
   return dict(row)
 
 

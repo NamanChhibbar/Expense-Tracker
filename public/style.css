@@ -66,6 +66,15 @@ h2 { font-size: 1.2rem; margin-bottom: 14px; }
 #tracker[hidden] { display: none; }
 #tracker .summary { margin-bottom: 0; }
 
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.card-head h2 { margin-bottom: 0; }
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -139,7 +148,8 @@ input:focus, select:focus { outline: none; border-color: var(--pink); background
 .expense-desc { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .expense-meta { font-size: 0.85rem; color: var(--ink-soft); }
 .expense-amount { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 1.1rem; }
-.delete-btn {
+.expense-actions { display: flex; gap: 2px; }
+.icon-btn {
   border: none;
   background: transparent;
   color: var(--ink-soft);
@@ -148,7 +158,33 @@ input:focus, select:focus { outline: none; border-color: var(--pink); background
   border-radius: 50%;
   cursor: pointer;
 }
+.edit-btn:hover { background: var(--pink-soft); }
 .delete-btn:hover { background: #ffe8ee; color: var(--danger); }
+
+.modal {
+  width: min(560px, calc(100% - 32px));
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+.modal[open] { animation: modal-in 0.2s ease-out; }
+.modal::backdrop {
+  background: rgba(90, 42, 65, 0.35);
+  backdrop-filter: blur(2px);
+  animation: fade-in 0.2s ease-out;
+}
+.modal-body { padding: 20px; }
+
+.form-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+.form-error[hidden] { display: none; }
 
 .empty { text-align: center; color: var(--ink-soft); margin: 8px 0; }
 
@@ -170,6 +206,8 @@ input:focus, select:focus { outline: none; border-color: var(--pink); background
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes pop { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 560px) {

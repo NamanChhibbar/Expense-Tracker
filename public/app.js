@@ -1,6 +1,5 @@
 const CATEGORY_EMOJI = {
-  Food: '🍓', Shopping: '🛍️', Transport: '🚌', Bills: '🧾',
-  Fun: '🎀', Health: '💊', Gifts: '🎁', Other: '✨',
+  Food: '🍓', Shopping: '🛍️', Travel: '✈️', Health: '💊', Other: '✨',
 };
 const STORAGE_KEY = 'expense-tracker:user';
 
@@ -13,7 +12,13 @@ const els = {
   cancelUserBtn: $('cancel-user-btn'),
   currencySelect: $('currency-select'),
   tracker: $('tracker'),
+  addExpenseBtn: $('add-expense-btn'),
+  expenseDialog: $('expense-dialog'),
+  expenseDialogTitle: $('expense-dialog-title'),
   expenseForm: $('expense-form'),
+  expenseError: $('expense-error'),
+  expenseSubmitBtn: $('expense-submit-btn'),
+  cancelExpenseBtn: $('cancel-expense-btn'),
   categorySelect: $('category-select'),
   list: $('expense-list'),
   empty: $('empty-state'),
@@ -22,7 +27,8 @@ const els = {
   toast: $('toast'),
 };
 
-const state = { users: [], currentUser: null, expenses: [] };
+// editingId is the id of the expense open in the dialog, or null when adding a new one.
+const state = { users: [], currentUser: null, expenses: [], editingId: null };
 
 async function api(path, options = {}) {
   const res = await fetch(path, {
@@ -102,15 +108,27 @@ function renderExpenses() {
     amount.className = 'expense-amount';
     amount.textContent = money(e.amount_cents);
 
+    const edit = document.createElement('button');
+    edit.className = 'icon-btn edit-btn';
+    edit.type = 'button';
+    edit.title = 'Edit expense';
+    edit.setAttribute('aria-label', `Edit ${e.description}`);
+    edit.textContent = '✏️';
+    edit.addEventListener('click', () => openExpenseDialog(e));
+
     const del = document.createElement('button');
-    del.className = 'delete-btn';
+    del.className = 'icon-btn delete-btn';
     del.type = 'button';
     del.title = 'Delete expense';
     del.setAttribute('aria-label', `Delete ${e.description}`);
     del.textContent = '🗑️';
     del.addEventListener('click', () => deleteExpense(e));
 
-    li.append(icon, main, amount, del);
+    const actions = document.createElement('div');
+    actions.className = 'expense-actions';
+    actions.append(edit, del);
+
+    li.append(icon, main, amount, actions);
     return li;
   });
 
@@ -120,9 +138,39 @@ function renderExpenses() {
   els.allTotal.textContent = money(all);
 }
 
+function sortExpenses(list) {
+  return list.sort((a, b) => b.spent_on.localeCompare(a.spent_on) || b.id - a.id);
+}
+
+// Opens the expense dialog empty for adding, or prefilled when given an expense to edit.
+function openExpenseDialog(expense = null) {
+  const f = els.expenseForm;
+  f.reset();
+  els.expenseError.hidden = true;
+  state.editingId = expense ? expense.id : null;
+  els.expenseDialogTitle.textContent = expense ? 'Edit expense' : 'Add an expense ✨';
+  els.expenseSubmitBtn.textContent = expense ? 'Save' : 'Add 💸';
+  if (expense) {
+    f.elements.description.value = expense.description;
+    f.elements.amount.value = expense.amount_cents / 100;
+    f.elements.category.value = expense.category;
+    f.elements.date.value = expense.spent_on;
+  } else {
+    f.elements.date.value = today();
+  }
+  els.expenseDialog.showModal();
+  f.elements.description.focus();
+}
+
+function closeExpenseDialog() {
+  els.expenseDialog.close();
+}
+
 function showUserForm(show) {
   els.userFormCard.hidden = !show;
   els.tracker.hidden = show || !state.currentUser;
+  // With no users yet there is nothing to go back to, so cancelling would leave a blank page.
+  els.cancelUserBtn.hidden = !state.currentUser;
   if (show) els.userForm.elements.name.focus();
 }
 
@@ -131,7 +179,11 @@ async function selectUser(id) {
   if (!state.currentUser) return;
   try { localStorage.setItem(STORAGE_KEY, state.currentUser.id); } catch {}
   renderUsers();
-  state.expenses = await api(`/api/users/${state.currentUser.id}/expenses`);
+  const user = state.currentUser;
+  const expenses = await api(`/api/users/${user.id}/expenses`);
+  // Ignore a slow response if another user was picked while it loaded.
+  if (state.currentUser !== user) return;
+  state.expenses = expenses;
   renderExpenses();
   showUserForm(false);
 }
@@ -148,7 +200,7 @@ async function deleteExpense(expense) {
   }
 }
 
-els.userSelect.addEventListener('change', (e) => selectUser(e.target.value));
+els.userSelect.addEventListener('change', (e) => selectUser(e.target.value).catch((err) => toast(err.message)));
 els.newUserBtn.addEventListener('click', () => showUserForm(true));
 els.cancelUserBtn.addEventListener('click', () => showUserForm(false));
 
@@ -166,21 +218,41 @@ els.userForm.addEventListener('submit', async (e) => {
   }
 });
 
+els.addExpenseBtn.addEventListener('click', () => openExpenseDialog());
+els.cancelExpenseBtn.addEventListener('click', closeExpenseDialog);
+
+// A click on the faded background lands on the dialog element itself, outside .modal-body.
+// The press must also start there, so selecting text in an input and releasing outside doesn't close it.
+let pressedBackdrop = false;
+els.expenseDialog.addEventListener('mousedown', (e) => {
+  pressedBackdrop = e.target === els.expenseDialog;
+});
+els.expenseDialog.addEventListener('click', (e) => {
+  if (pressedBackdrop && e.target === els.expenseDialog) closeExpenseDialog();
+});
+
 els.expenseForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const body = Object.fromEntries(new FormData(els.expenseForm));
+  const editing = state.editingId !== null;
+  els.expenseSubmitBtn.disabled = true;
   try {
-    const expense = await api(`/api/users/${state.currentUser.id}/expenses`, { method: 'POST', body });
-    state.expenses = [expense, ...state.expenses].sort(
-      (a, b) => b.spent_on.localeCompare(a.spent_on) || b.id - a.id
-    );
+    if (editing) {
+      const updated = await api(`/api/expenses/${state.editingId}`, { method: 'PUT', body });
+      state.expenses = sortExpenses(state.expenses.map((x) => (x.id === updated.id ? updated : x)));
+    } else {
+      const created = await api(`/api/users/${state.currentUser.id}/expenses`, { method: 'POST', body });
+      state.expenses = sortExpenses([created, ...state.expenses]);
+    }
     renderExpenses();
-    els.expenseForm.reset();
-    els.expenseForm.elements.date.value = today();
-    els.expenseForm.elements.description.focus();
-    toast('Added 💖');
+    closeExpenseDialog();
+    toast(editing ? 'Saved 💖' : 'Added 💖');
   } catch (err) {
-    toast(err.message);
+    // The toast would sit behind the faded background, so show the error inside the dialog.
+    els.expenseError.textContent = err.message;
+    els.expenseError.hidden = false;
+  } finally {
+    els.expenseSubmitBtn.disabled = false;
   }
 });
 
@@ -189,7 +261,6 @@ async function init() {
   state.users = users;
   fillOptions(els.categorySelect, categories);
   fillOptions(els.currencySelect, currencies);
-  els.expenseForm.elements.date.value = today();
   renderUsers();
 
   if (users.length === 0) return showUserForm(true);

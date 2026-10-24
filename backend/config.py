@@ -1,6 +1,5 @@
-'''App configuration. Values can be overridden with environment variables.'''
+'''App configuration.'''
 
-import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

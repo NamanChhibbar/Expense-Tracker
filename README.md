@@ -7,7 +7,7 @@ Expense Tracker is a lightweight, single-page web app for recording personal exp
 - Create users, each with a display name and a currency.
 - Switch between users from the header.
 - Add expenses with a description, amount, category and date.
-- Delete expenses.
+- Edit and delete expenses.
 - View the current month's total and the all-time total for each user.
 
 ## Tech stack
@@ -49,14 +49,7 @@ The app is then available at <http://localhost:8000>. Interactive API documentat
 
 ## Configuration
 
-These environment variables override the defaults:
-
-| Variable | Default | Description |
-| --- | --- | --- |
-| `DB_PATH` | `data/expenses.db` | Location of the SQLite database file. It is created on first run. |
-| `PUBLIC_DIR` | `public` | Folder containing the frontend files. |
-
-Categories, currencies and other defaults are defined in `backend/config.py`.
+Paths, categories, currencies and other defaults are defined in `backend/config.py`. The database is stored at `data/expenses.db` and is created on first run.
 
 To back up your data, copy the database file while the server is stopped.
 
@@ -121,6 +114,7 @@ All endpoints accept and return JSON. Errors are returned as `{ "error": "messag
 | `POST` | `/api/users` | `{ name, currency? }` | Creates a user. User names must be unique. |
 | `GET` | `/api/users/{id}/expenses` | None | Lists a user's expenses, newest first. |
 | `POST` | `/api/users/{id}/expenses` | `{ description, amount, category?, date? }` | Adds an expense. `date` uses the `YYYY-MM-DD` format and defaults to today. |
+| `PUT` | `/api/expenses/{id}` | `{ description, amount, category?, date? }` | Updates an expense. Omitted optional fields fall back to their defaults. |
 | `DELETE` | `/api/expenses/{id}` | None | Deletes an expense. |
 
 Amounts are returned in cents, in the `amount_cents` field.

@@ -6,6 +6,7 @@
   <title>Expense Tracker</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -50,7 +51,19 @@
       </div>
 
       <section class="card">
-        <h2>Add an expense ✨</h2>
+        <div class="card-head">
+          <h2>Spending</h2>
+          <button id="add-expense-btn" class="btn" type="button">+ Add expense</button>
+        </div>
+        <ul id="expense-list" class="expense-list"></ul>
+        <p id="empty-state" class="empty" hidden>No expenses yet. Treat yourself! 🍰</p>
+      </section>
+    </section>
+
+    <!-- Used for both adding and editing an expense -->
+    <dialog id="expense-dialog" class="modal" aria-labelledby="expense-dialog-title">
+      <div class="modal-body">
+        <h2 id="expense-dialog-title">Add an expense ✨</h2>
         <form id="expense-form" class="form-grid">
           <label class="span-2">What was it?
             <input name="description" maxlength="80" required placeholder="Boba tea" autocomplete="off" />
@@ -64,18 +77,14 @@
           <label>Date
             <input name="date" type="date" required />
           </label>
+          <p id="expense-error" class="form-error" role="alert" hidden></p>
           <div class="form-actions">
-            <button type="submit" class="btn">Add 💸</button>
+            <button type="button" id="cancel-expense-btn" class="btn btn-ghost">Cancel</button>
+            <button type="submit" id="expense-submit-btn" class="btn">Add 💸</button>
           </div>
         </form>
-      </section>
-
-      <section class="card">
-        <h2>Spending</h2>
-        <ul id="expense-list" class="expense-list"></ul>
-        <p id="empty-state" class="empty" hidden>No expenses yet. Treat yourself! 🍰</p>
-      </section>
-    </section>
+      </div>
+    </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>

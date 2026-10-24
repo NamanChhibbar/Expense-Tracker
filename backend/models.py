@@ -35,7 +35,7 @@ class Expense(BaseModel):
   description: str = Field(min_length=1, max_length=80)
   amount: float = Field(gt=0, le=1e9)
   category: str = DEFAULT_CATEGORY
-  date: str | None = None
+  date: str | None = Field(default=None, validate_default=True)
 
   @field_validator('description')
   @classmethod
@@ -43,6 +43,14 @@ class Expense(BaseModel):
     v = v.strip()
     if not v:
       raise ValueError('is required')
+    return v
+
+  @field_validator('amount')
+  @classmethod
+  def at_least_one_cent(cls, v: float) -> float:
+    # Amounts are stored in cents, so anything that rounds to 0 would be rejected by the database.
+    if round(v * 100) < 1:
+      raise ValueError('must be at least 0.01')
     return v
 
   @field_validator('category')
@@ -53,7 +61,9 @@ class Expense(BaseModel):
   @field_validator('date')
   @classmethod
   def valid_date(cls, v: str | None) -> str:
-    if v and re.fullmatch(r'\d{4}-\d{2}-\d{2}', v):
-      date.fromisoformat(v)  # rejects impossible dates like 2026-02-31
-      return v
-    return date.today().isoformat()
+    if not v:
+      return date.today().isoformat()
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', v):
+      raise ValueError('must use the YYYY-MM-DD format')
+    date.fromisoformat(v)  # rejects impossible dates like 2026-02-31
+    return v
