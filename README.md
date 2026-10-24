@@ -45,7 +45,7 @@ Start the development server from the project root:
 .venv/bin/uvicorn backend.app:app --reload
 ```
 
-The app is then available at http://localhost:8000. Interactive API documentation is available at http://localhost:8000/docs.
+The app is then available at <http://localhost:8000>. Interactive API documentation is available at <http://localhost:8000/docs>.
 
 ## Configuration
 
