@@ -66,7 +66,7 @@ function fillOptions(select, values) {
 
 function renderUsers() {
   els.userSelect.replaceChildren(
-    ...state.users.map((u) => new Option(`${u.emoji} ${u.name}`, u.id))
+    ...state.users.map((u) => new Option(u.name, u.id))
   );
   if (state.currentUser) els.userSelect.value = state.currentUser.id;
   els.userSelect.hidden = state.users.length === 0;
@@ -122,7 +122,6 @@ function renderExpenses() {
 
 function showUserForm(show) {
   els.userFormCard.hidden = !show;
-  els.cancelUserBtn.hidden = state.users.length === 0;
   els.tracker.hidden = show || !state.currentUser;
   if (show) els.userForm.elements.name.focus();
 }
@@ -161,7 +160,7 @@ els.userForm.addEventListener('submit', async (e) => {
     state.users = [...state.users, user].sort((a, b) => a.name.localeCompare(b.name));
     els.userForm.reset();
     await selectUser(user.id);
-    toast(`Hi ${user.name}! ${user.emoji}`);
+    toast(`Hi ${user.name}! 💖`);
   } catch (err) {
     toast(err.message);
   }

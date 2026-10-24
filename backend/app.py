@@ -54,8 +54,8 @@ def create_user(body: User):
   try:
     with connect() as conn:
       cur = conn.execute(
-        'INSERT INTO users (name, emoji, currency) VALUES (?, ?, ?)',
-        (body.name, body.emoji, body.currency),
+        'INSERT INTO users (name, currency) VALUES (?, ?)',
+        (body.name, body.currency),
       )
       row = conn.execute(f'SELECT {USER_COLS} FROM users WHERE id = ?', (cur.lastrowid,)).fetchone()
   except sqlite3.IntegrityError:

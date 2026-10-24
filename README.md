@@ -4,7 +4,7 @@ Expense Tracker is a lightweight, single-page web app for recording personal exp
 
 ## Features
 
-- Create users, each with a display name, an emoji and a currency.
+- Create users, each with a display name and a currency.
 - Switch between users from the header.
 - Add expenses with a description, amount, category and date.
 - Delete expenses.
@@ -118,7 +118,7 @@ All endpoints accept and return JSON. Errors are returned as `{ "error": "messag
 | Method | Path | Request body | Description |
 | --- | --- | --- | --- |
 | `GET` | `/api/users` | None | Lists users, plus the available categories and currencies. |
-| `POST` | `/api/users` | `{ name, emoji?, currency? }` | Creates a user. User names must be unique. |
+| `POST` | `/api/users` | `{ name, currency? }` | Creates a user. User names must be unique. |
 | `GET` | `/api/users/{id}/expenses` | None | Lists a user's expenses, newest first. |
 | `POST` | `/api/users/{id}/expenses` | `{ description, amount, category?, date? }` | Adds an expense. `date` uses the `YYYY-MM-DD` format and defaults to today. |
 | `DELETE` | `/api/expenses/{id}` | None | Deletes an expense. |

@@ -10,13 +10,11 @@ from .config import (
   CURRENCIES,
   DEFAULT_CATEGORY,
   DEFAULT_CURRENCY,
-  DEFAULT_EMOJI,
 )
 
 
 class User(BaseModel):
   name: str = Field(min_length=1, max_length=40)
-  emoji: str = DEFAULT_EMOJI
   currency: str = DEFAULT_CURRENCY
 
   @field_validator('name')
@@ -26,11 +24,6 @@ class User(BaseModel):
     if not v:
       raise ValueError('is required')
     return v
-
-  @field_validator('emoji')
-  @classmethod
-  def clean_emoji(cls, v: str) -> str:
-    return v.strip()[:8] or DEFAULT_EMOJI
 
   @field_validator('currency')
   @classmethod

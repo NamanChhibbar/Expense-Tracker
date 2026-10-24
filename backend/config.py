@@ -9,10 +9,8 @@ DB_PATH = Path(os.environ.get('DB_PATH', PROJECT_ROOT / 'data' / 'expenses.db'))
 
 APP_TITLE = 'Expense Tracker'
 
-CATEGORIES = ['Food', 'Shopping', 'Travel', 'Bills', 'Health', 'Other']
+CATEGORIES = ['Food', 'Shopping', 'Travel', 'Health', 'Other']
 DEFAULT_CATEGORY = 'Other'
 
 CURRENCIES = ['INR', 'USD']
 DEFAULT_CURRENCY = 'INR'
-
-DEFAULT_EMOJI = '🌸'

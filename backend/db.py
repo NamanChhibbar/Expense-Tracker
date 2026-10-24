@@ -11,7 +11,6 @@ PRAGMA journal_mode = WAL;
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE COLLATE NOCASE,
-  emoji TEXT NOT NULL DEFAULT '🌸',
   currency TEXT NOT NULL DEFAULT 'USD',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -27,7 +26,7 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses(user_id, spent_on);
 '''
 
-USER_COLS = 'id, name, emoji, currency'
+USER_COLS = 'id, name, currency'
 EXPENSE_COLS = 'id, description, amount_cents, category, spent_on'
 
 
