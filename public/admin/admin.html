@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Expense Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1><span aria-hidden="true">🌸</span> Admin</h1>
+      <a href="/" class="btn btn-soft">← Back to tracker</a>
+    </header>
+
+    <section class="card">
+      <h2 id="users-heading">All users</h2>
+      <div class="table-wrap">
+        <table class="admin-table" aria-labelledby="users-heading">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Currency</th>
+              <th scope="col" class="num">Expenses</th>
+              <th scope="col" class="num">Total spent</th>
+              <th scope="col">Last expense</th>
+              <th scope="col">Joined</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="user-rows"></tbody>
+        </table>
+      </div>
+      <p id="empty-state" class="empty" hidden>No users yet.</p>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script src="/admin/admin.js" type="module"></script>
+</body>
+</html>
