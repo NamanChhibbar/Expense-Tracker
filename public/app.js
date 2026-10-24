@@ -2,6 +2,8 @@ const CATEGORY_EMOJI = {
   Food: '🍓', Shopping: '🛍️', Travel: '✈️', Health: '💊', Gifts: '🎁', Other: '✨',
 };
 const STORAGE_KEY = 'expense-tracker:user';
+// Used until the server sends its own default, so amounts never briefly show in another currency.
+let defaultCurrency = 'INR';
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -51,7 +53,7 @@ function toast(message) {
 }
 
 function money(cents) {
-  const currency = state.currentUser?.currency || 'USD';
+  const currency = state.currentUser?.currency || defaultCurrency;
   return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents / 100);
 }
 
@@ -66,8 +68,9 @@ function prettyDate(iso) {
   return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function fillOptions(select, values) {
-  select.replaceChildren(...values.map((v) => new Option(v, v)));
+// The selected value is marked as the default too, so form.reset() goes back to it.
+function fillOptions(select, values, selected = values[0]) {
+  select.replaceChildren(...values.map((v) => new Option(v, v, v === selected, v === selected)));
 }
 
 function renderUsers() {
@@ -257,10 +260,11 @@ els.expenseForm.addEventListener('submit', async (e) => {
 });
 
 async function init() {
-  const { users, categories, currencies } = await api('/api/users');
+  const { users, categories, currencies, default_currency } = await api('/api/users');
   state.users = users;
+  defaultCurrency = default_currency;
   fillOptions(els.categorySelect, categories);
-  fillOptions(els.currencySelect, currencies);
+  fillOptions(els.currencySelect, currencies, default_currency);
   renderUsers();
 
   if (users.length === 0) return showUserForm(true);

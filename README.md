@@ -111,8 +111,8 @@ All endpoints accept and return JSON. Errors are returned as `{ "error": "messag
 
 | Method | Path | Request body | Description |
 | --- | --- | --- | --- |
-| `GET` | `/api/users` | None | Lists users, plus the available categories and currencies. |
-| `POST` | `/api/users` | `{ name, currency? }` | Creates a user. User names must be unique. |
+| `GET` | `/api/users` | None | Lists users, plus the available categories and currencies and the default currency (INR). |
+| `POST` | `/api/users` | `{ name, currency? }` | Creates a user. User names must be unique. `currency` defaults to INR. |
 | `GET` | `/api/users/{id}/expenses` | None | Lists a user's expenses, newest first. |
 | `POST` | `/api/users/{id}/expenses` | `{ description, amount, category?, date? }` | Adds an expense. `date` uses the `YYYY-MM-DD` format and defaults to today. |
 | `PUT` | `/api/expenses/{id}` | `{ description, amount, category?, date? }` | Updates an expense. Omitted optional fields fall back to their defaults. |

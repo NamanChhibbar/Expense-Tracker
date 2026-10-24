@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .db import EXPENSE_COLS, USER_COLS, connect, init_db
 from .models import Expense, User
-from .config import APP_TITLE, CATEGORIES, CURRENCIES, PUBLIC_DIR
+from .config import APP_TITLE, CATEGORIES, CURRENCIES, DEFAULT_CURRENCY, PUBLIC_DIR
 
 
 @asynccontextmanager
@@ -58,7 +58,12 @@ def require_user(conn: sqlite3.Connection, user_id: int) -> None:
 def list_users():
   with connect() as conn:
     users = conn.execute(f'SELECT {USER_COLS} FROM users ORDER BY name').fetchall()
-  return {'users': [dict(u) for u in users], 'categories': CATEGORIES, 'currencies': CURRENCIES}
+  return {
+    'users': [dict(u) for u in users],
+    'categories': CATEGORIES,
+    'currencies': CURRENCIES,
+    'default_currency': DEFAULT_CURRENCY,
+  }
 
 
 @app.post('/api/users', status_code=201)
