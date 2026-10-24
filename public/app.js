@@ -1,5 +1,5 @@
 const CATEGORY_EMOJI = {
-  Food: '🍓', Shopping: '🛍️', Travel: '✈️', Health: '💊', Other: '✨',
+  Food: '🍓', Shopping: '🛍️', Travel: '✈️', Health: '💊', Gifts: '🎁', Other: '✨',
 };
 const STORAGE_KEY = 'expense-tracker:user';
 

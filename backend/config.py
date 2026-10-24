@@ -8,7 +8,7 @@ DB_PATH = PROJECT_ROOT / 'data' / 'expenses.db'
 
 APP_TITLE = 'Expense Tracker'
 
-CATEGORIES = ['Food', 'Shopping', 'Travel', 'Health', 'Other']
+CATEGORIES = ['Food', 'Shopping', 'Travel', 'Health', 'Gifts', 'Other']
 DEFAULT_CATEGORY = 'Other'
 
 CURRENCIES = ['INR', 'USD']
