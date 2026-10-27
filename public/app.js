@@ -141,10 +141,6 @@ function renderExpenses() {
   els.allTotal.textContent = money(all);
 }
 
-function sortExpenses(list) {
-  return list.sort((a, b) => b.spent_on.localeCompare(a.spent_on) || b.id - a.id);
-}
-
 // Opens the expense dialog empty for adding, or prefilled when given an expense to edit.
 function openExpenseDialog(expense = null) {
   const f = els.expenseForm;
@@ -233,6 +229,10 @@ els.expenseDialog.addEventListener('mousedown', (e) => {
 els.expenseDialog.addEventListener('click', (e) => {
   if (pressedBackdrop && e.target === els.expenseDialog) closeExpenseDialog();
 });
+
+function sortExpenses(list) {
+  return list.sort((a, b) => b.spent_on.localeCompare(a.spent_on) || b.id - a.id);
+}
 
 els.expenseForm.addEventListener('submit', async (e) => {
   e.preventDefault();
